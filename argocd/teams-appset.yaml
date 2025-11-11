@@ -9,8 +9,6 @@ spec:
       revision: HEAD
       directories:
       - path: "teams/*"
-      - path: teams/EXAMPLE
-        exclude: true
   template:
     metadata:
       name: 'team-{{path.basename}}'
