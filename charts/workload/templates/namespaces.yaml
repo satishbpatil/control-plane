@@ -2,21 +2,25 @@ apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
   name: workload-{{ .Values.workloadName }}-namespace
+  namespace: argocd
 spec:
   generators:
     - git:
         repoURL: https://github.com/satishbpatil/control-plane
         revision: main
-        directories:
-          - path: config/{{ .Values.workloadName }}/*
+        files:
+          # Each config.json = one environment
+          - path: config/{{ .Values.workloadName }}/*/config.json
 
   template:
     metadata:
       name: "workload-{{ .Values.workloadName }}-namespace-{{ env }}"
+      namespace: argocd
       labels:
         workload: "{{ .Values.workloadName }}"
         environment: "{{ env }}"
-        cluster: "{{ clusterName }}"
+        cluster: "{{ cfg.cluster.name }}"
+
     spec:
       project: {{ .Values.project | default "default" }}
 
@@ -26,47 +30,37 @@ spec:
         path: charts/namespace
         helm:
           valueFiles:
-            - "config/{{ .Values.workloadName }}/default-namespace.yaml"
-            - "config/{{ .Values.workloadName }}/{{ env }}/namespace.yaml"
+            # always include default
+            - config/{{ .Values.workloadName }}/default-namespace.yaml
+
+            # optional env-specific override (ignored if missing)
+            - config/{{ .Values.workloadName }}/{{ env }}/namespace.yaml
+
           parameters:
             - name: workloadName
               value: "{{ .Values.workloadName }}"
             - name: environment
               value: "{{ env }}"
+
+            # metadata extracted from config.json
             - name: awsAccount
-              value: "{{ awsAccount }}"
+              value: "{{ cfg.aws_account }}"
             - name: assetId
-              value: "{{ assetId }}"
+              value: "{{ cfg.asset_id }}"
             - name: clusterName
-              value: "{{ clusterName }}"
+              value: "{{ cfg.cluster.name }}"
             - name: clusterOwner
-              value: "{{ clusterOwner }}"
+              value: "{{ cfg.cluster.owner }}"
 
+      # Namespace resource is cluster-scoped → only set cluster destination
       destination:
-        name: "{{ clusterName}}"
+        server: "{{ cfg.cluster.address }}"
 
-  templatePatch:
-    # Extract environment name from folder
+  templateParameters:
+    # env = the parent folder name of config.json
     - name: env
-      value: '{{ path | basename }}'
+      value: '{{ path | dirname | basename }}'
 
-    # Read environment's config.json → cfg
+    # cfg = parsed JSON contents of the config file
     - name: cfg
-      value: '{{ file.Read "config/{{ .Values.workloadName }}/{{ env }}/config.json" | fromJson }}'
-
-    # Extract cluster endpoint
-    - name: clusterAddress
-      value: '{{ cfg.cluster.address }}'
-
-    # Extract metadata
-    - name: awsAccount
-      value: '{{ cfg.aws_account }}'
-
-    - name: assetId
-      value: '{{ cfg.asset_id }}'
-
-    - name: clusterName
-      value: '{{ cfg.cluster.name }}'
-
-    - name: clusterOwner
-      value: '{{ cfg.cluster.owner }}'
+      value: '{{ file.Read path | fromJson }}'
