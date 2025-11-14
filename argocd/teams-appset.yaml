@@ -17,7 +17,7 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://github.com/your/repo.git
+        repoURL: https://github.com/satishbpatil/control-plane
         targetRevision: main
         path: charts/workload       # <--- workload Helm chart
         helm:

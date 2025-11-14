@@ -1,0 +1,72 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: workload-{{ .Values.workloadName }}-namespace
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/satishbpatil/control-plane
+        revision: main
+        directories:
+          - path: config/{{ .Values.workloadName }}/*
+
+  template:
+    metadata:
+      name: "workload-{{ .Values.workloadName }}-namespace-{{ env }}"
+      labels:
+        workload: "{{ .Values.workloadName }}"
+        environment: "{{ env }}"
+        cluster: "{{ clusterName }}"
+    spec:
+      project: {{ .Values.project | default "default" }}
+
+      source:
+        repoURL: https://github.com/satishbpatil/control-plane
+        targetRevision: main
+        path: charts/namespace
+        helm:
+          valueFiles:
+            - "config/{{ .Values.workloadName }}/default-namespace.yaml"
+            - "config/{{ .Values.workloadName }}/{{ env }}/namespace.yaml"
+          parameters:
+            - name: workloadName
+              value: "{{ .Values.workloadName }}"
+            - name: environment
+              value: "{{ env }}"
+            - name: awsAccount
+              value: "{{ awsAccount }}"
+            - name: assetId
+              value: "{{ assetId }}"
+            - name: clusterName
+              value: "{{ clusterName }}"
+            - name: clusterOwner
+              value: "{{ clusterOwner }}"
+
+      destination:
+        name: "{{ clusterName}}"
+
+  templatePatch:
+    # Extract environment name from folder
+    - name: env
+      value: '{{ path | basename }}'
+
+    # Read environment's config.json → cfg
+    - name: cfg
+      value: '{{ file.Read "config/{{ .Values.workloadName }}/{{ env }}/config.json" | fromJson }}'
+
+    # Extract cluster endpoint
+    - name: clusterAddress
+      value: '{{ cfg.cluster.address }}'
+
+    # Extract metadata
+    - name: awsAccount
+      value: '{{ cfg.aws_account }}'
+
+    - name: assetId
+      value: '{{ cfg.asset_id }}'
+
+    - name: clusterName
+      value: '{{ cfg.cluster.name }}'
+
+    - name: clusterOwner
+      value: '{{ cfg.cluster.owner }}'
