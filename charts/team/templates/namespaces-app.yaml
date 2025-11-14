@@ -1,37 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
-kind: ApplicationSet
+kind: Application
 metadata:
-  name: workload-namespaces
+  name: '{{ .Release.Name }}-namespaces'
 spec:
-  generators:
-    - git:
-        repoURL: 'https://github.com/satishbpatil/control-plane'
-        revision: main
-        files:
-          - path: workloads/*/namespace/env-cluster-map.yaml
-
-  template:
-    metadata:
-      name: '{{workload}}-{{env}}-ns'
-      labels:
-        workload: '{{workload}}'
-        environment: '{{env}}'
-        cluster: '{{cluster}}'
-    spec:
-      project: platform
-      source:
-        repoURL: https://github.com/org/gitops-repo.git
-        targetRevision: main
-        path: charts/namespace
-        helm:
-          valueFiles:
-            - workloads/{{workload}}/namespace/default-values.yaml
-            # This optional file may not exist; Argo CD ignores missing ones
-            - workloads/{{workload}}/namespace/{{env}}-values.yaml
-      destination:
-        name: '{{cluster}}'
-        namespace: '{{workload}}'
-      syncPolicy:
-        automated:
-          prune: true
-          selfHeal: true
+  project: default
+  source:
+    helm:
+      releaseName: '{{ .Release.Name }}'
+      valueFiles:
+      - '../../teams/{{ .Release.Name }}/values.yaml'
+    repoURL: 'https://github.com/satishbpatil/control-plane'
+    path: charts/namespaces
+    targetRevision: HEAD
+  destination:
+    namespace: '*'
+    name: {{ .Values.cluster }}
+  syncPolicy:
+    automated: {}
