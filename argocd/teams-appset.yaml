@@ -1,29 +1,35 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: teams
+  name: workloads
+  namespace: argocd
 spec:
   generators:
-  - git:
-      repoURL: https://github.com/satishbpatil/control-plane
-      revision: HEAD
-      directories:
-      - path: "teams/*"
+    - git:
+        repoURL: https://github.com/satishbpatil/control-plane
+        revision: main
+        directories:
+          - path: config/*
+
   template:
     metadata:
-      name: 'team-{{path.basename}}'
+      name: 'workload-{{workload}}'
     spec:
       project: default
       source:
+        repoURL: https://github.com/your/repo.git
+        targetRevision: main
+        path: charts/workload       # <--- workload Helm chart
         helm:
-          releaseName: '{{path.basename}}'
-          valueFiles:
-          - '../../{{path}}/values.yaml'
-        repoURL: 'https://github.com/satishbpatil/control-plane'
-        path: charts/team
-        targetRevision: HEAD
+          parameters:
+            - name: workloadName
+              value: '{{workload}}'
+
       destination:
-        namespace: 'argocd'
-        name: 'in-cluster'
-      syncPolicy:
-        automated: {}
+        server: https://kubernetes.default.svc   # ArgoCD parent cluster
+        namespace: argocd
+
+  templatePatch:
+    - name: workload
+      value: '{{ path | basename }}'
+
