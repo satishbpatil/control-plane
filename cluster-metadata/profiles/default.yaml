@@ -1,0 +1,6 @@
+labels:
+  enable_external_secrets: "true"
+
+annotations:
+  external_secrets_namespace: "external-secrets"
+  external_secrets_serviceAccount: "external-secrets-sa"

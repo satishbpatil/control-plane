@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cluster-metadata
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/satishbpatil/control-plane   # CHANGE THIS
+        revision: main
+        directories:
+          - path: cluster-metadata/clusters/*           # 🔥 loop through cluster folders
+
+  template:
+    metadata:
+      name: "cluster-metadata-{{path.basename}}"        # e.g. cluster-metadata-in-cluster
+      namespace: argocd
+
+    spec:
+      project: default
+
+      source:
+        repoURL: https://github.com/satishbpatil/control-plane   # CHANGE THIS
+        targetRevision: main
+        path: charts/cluster-metadata                   # ← your helm chart path
+
+        helm:
+          releaseName: "cluster-metadata-{{path.basename}}"
+
+          # 🔥 Two value files:
+          # 1. profile file based on profile specified in cluster values
+          # 2. cluster-specific values
+          valueFiles:
+            - "cluster-metadata/profiles/{{ .Values.profile }}.yaml"
+            - "cluster-metadata/clusters/{{path.basename}}/values.yaml"
+
+          # 🔥 Pass secretName -> cluster-name (same as cluster secret)
+          parameters:
+            - name: secretName
+              value: "{{path.basename}}"
+
+      destination:
+        namespace: argocd
+        name: in-cluster
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=false
