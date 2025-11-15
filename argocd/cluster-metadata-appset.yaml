@@ -32,8 +32,8 @@ spec:
           releaseName: "cluster-metadata-{{ .path.basename }}"
 
           valueFiles:
-            - "cluster-metadata/profiles/{{ .profile }}.yaml"
-            - "cluster-metadata/clusters/{{ .path.basename }}/values.yaml"
+            - "../../cluster-metadata/profiles/{{ .profile }}.yaml"
+            - "../../cluster-metadata/clusters/{{ .path.basename }}/values.yaml"
 
           parameters:
             - name: secretName
