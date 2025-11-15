@@ -1,4 +1,4 @@
-proifle: default
+profile: default
 
 labels:
   enable_ingress_nginx : true
