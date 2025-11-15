@@ -4,44 +4,45 @@ metadata:
   name: cluster-metadata
   namespace: argocd
 spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+
   generators:
     - git:
-        repoURL: https://github.com/satishbpatil/control-plane   # CHANGE THIS
+        repoURL: https://github.com/satishbpatil/control-plane
         revision: main
-        directories:
-          - path: cluster-metadata/clusters/*           # 🔥 loop through cluster folders
+        files:
+          - path: "cluster-metadata/clusters/*/values.yaml"
 
   template:
     metadata:
-      name: "cluster-metadata-{{path.basename}}"        # e.g. cluster-metadata-in-cluster
+      name: "cluster-metadata-{{ .path.basename }}"
       namespace: argocd
 
     spec:
       project: default
 
       source:
-        repoURL: https://github.com/satishbpatil/control-plane   # CHANGE THIS
+        repoURL: https://github.com/satishbpatil/control-plane
         targetRevision: main
-        path: charts/cluster-metadata                   # ← your helm chart path
+        path: charts/cluster-metadata
 
         helm:
-          releaseName: "cluster-metadata-{{path.basename}}"
+          releaseName: "cluster-metadata-{{ .path.basename }}"
 
-          # 🔥 Two value files:
-          # 1. profile file based on profile specified in cluster values
-          # 2. cluster-specific values
           valueFiles:
-            - "cluster-metadata/profiles/{{ .Values.profile }}.yaml"
-            - "cluster-metadata/clusters/{{path.basename}}/values.yaml"
+            - "cluster-metadata/profiles/{{ .profile }}.yaml"
+            - "cluster-metadata/clusters/{{ .path.basename }}/values.yaml"
 
-          # 🔥 Pass secretName -> cluster-name (same as cluster secret)
           parameters:
             - name: secretName
-              value: "{{path.basename}}"
+              value: "{{ .path.basename }}"
 
       destination:
         namespace: argocd
-        name: in-cluster
+        server: https://kubernetes.default.svc
+
       syncPolicy:
         automated:
           prune: true
