@@ -17,7 +17,7 @@ spec:
 
   template:
     metadata:
-      name: "cluster-metadata-{{ .path.basename }}"
+      name: "cluster-metadata-{{ .path.basename | sha1sum | trunc 15 }}"
       namespace: argocd
 
     spec:
