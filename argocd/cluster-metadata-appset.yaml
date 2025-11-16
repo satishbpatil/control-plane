@@ -29,7 +29,6 @@ spec:
         path: charts/cluster-metadata
 
         helm:
-          releaseName: "cluster-metadata-{{ .path.basename }}"
 
           valueFiles:
             - "../../cluster-metadata/profiles/{{ .profile }}.yaml"
