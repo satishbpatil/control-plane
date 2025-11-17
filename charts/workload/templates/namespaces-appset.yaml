@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: "{{ .Values.workloadName }}-namespaces"
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+
+  generators:
+  - git:
+      repoURL: https://github.com/satishbpatil/control-plane
+      revision: HEAD
+      files:
+        - path: "workload/{{ .Values.workloadName }}/workload.yaml"
+
+  template:
+    metadata:
+      name: "{{ .Values.workloadName }}-{{ .environment }}-namespaces"
+    spec:
+      project: default
+
+      source:
+        repoURL: https://github.com/satishbpatil/control-plane
+        targetRevision: HEAD
+        path: charts/namespaces
+        helm:
+          values:
+            workloadName: "{{ .Values.workloadName }}"
+            environment: "{{ .environment }}"
+          valueFiles:
+            - "workload/{{ .Values.workloadName }}/namespace/default-values.yaml"
+            - "workload/{{ .Values.workloadName }}/namespace/{{ .environment }}-values.yaml"
+
+      destination:
+        name: "{{ .cluster }}"
+        namespace: argocd
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true

@@ -16,7 +16,8 @@ spec:
       project: default
       source:
         helm:
-          releaseName: '{{path.basename}}'
+          values: |
+            workloadName: "{{path.basename}}"          
           valueFiles:
           - '../../{{path}}/workload.yaml'
         repoURL: 'https://github.com/satishbpatil/control-plane'

@@ -15,4 +15,5 @@ project:
 environments:
   dev:
     cluster: in-cluster
-    namespace: webstore-dev
+  stage:
+    cluster: cluster2
