@@ -12,7 +12,15 @@ spec:
       revision: HEAD
       files:
         - path: "workload/{{ .Values.workloadName }}/workload.yaml"
-
+    name: workload
+  - matrix:
+      generators:
+        - list:
+            elements: |
+              {{- range $env, $cfg := .workload.environments }}
+              - environment: {{ $env }}
+                cluster: {{ $cfg.cluster }}
+              {{- end }}
   template:
     metadata:
       name: "{{ .Values.workloadName }}-{{ .environment }}-namespaces"
