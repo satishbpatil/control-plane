@@ -17,7 +17,7 @@ spec:
       generators:
         - list:
             elements: |
-              {{- range $env, $cfg := .workload.environments }}
+              {{- range $env, $cfg := .Values.environments }}
               - environment: {{ $env }}
                 cluster: {{ $cfg.cluster }}
               {{- end }}
