@@ -1,4 +1,4 @@
-cluster: workshop
+cluster: in-cluster
 namespaces:
 - dev
 - stage
