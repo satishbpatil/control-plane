@@ -16,11 +16,11 @@ spec:
   - matrix:
       generators:
         - list:
-            elements: |
+            elements:
               {{- range $env, $cfg := .Values.environments }}
-              - environment: {{ $env }}
-                cluster: {{ $cfg.cluster }}
-              {{- end }}
+              - environment: "{{ $env }}"
+                cluster: "{{ $cfg.cluster }}"
+              {{- end }}      
   template:
     metadata:
       name: "{{ .Values.workloadName }}-{{ .environment }}-namespaces"
