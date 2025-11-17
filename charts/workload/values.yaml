@@ -1,4 +1,1 @@
-namespaces:
-- dev
-- stage
-- prod
+workloadName: {}

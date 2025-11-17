@@ -5,12 +5,13 @@ metadata:
   namespace: argocd
 spec:
   generators:
+    - cluster:
+    
     - git:
         repoURL: https://github.com/satishbpatil/control-plane
         revision: main
-        files:
-          # Each config.json = one environment
-          - path: config/{{ .Values.workloadName }}/*/config.json
+        directories:
+        - path: ../../workload/*/git-generator-directory/cluster-addons/*
 
   template:
     metadata:
