@@ -24,7 +24,7 @@ spec:
         targetRevision: HEAD
         path: charts/namespaces
         helm:
-          values:
+          values: |
             workloadName: "{{ .Values.workloadName }}"
             environment: "{{ .environment }}"
           valueFiles:
