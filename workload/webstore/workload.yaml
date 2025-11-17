@@ -1,0 +1,18 @@
+# workload.yaml
+# Defines environment topology and project metadata for this workload.
+
+project:
+  githubOrg: my-org
+  group: team-webstore   # SSO / AWS IAM Identity Center / Okta group for RBAC
+
+# Environment topology for this workload.
+# Each environment defines:
+#   - which cluster it deploys to
+#   - which namespace should be created
+#
+# Namespace convention: <workload>-<env>
+# The workload name is derived automatically from the folder name.
+environments:
+  dev:
+    cluster: in-cluster
+    namespace: webstore-dev

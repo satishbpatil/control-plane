@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: workloads
+spec:
+  generators:
+  - git:
+      repoURL: https://github.com/satishbpatil/control-plane
+      revision: HEAD
+      directories:
+      - path: "workload/*"
+  template:
+    metadata:
+      name: 'workload-{{path.basename}}'
+    spec:
+      project: default
+      source:
+        helm:
+          releaseName: '{{path.basename}}'
+          valueFiles:
+          - '../../{{path}}/workload.yaml'
+        repoURL: 'https://github.com/satishbpatil/control-plane'
+        path: charts/workload
+        targetRevision: HEAD
+      destination:
+        namespace: 'argocd'
+        name: 'in-cluster'
+      syncPolicy:
+        automated: {}
