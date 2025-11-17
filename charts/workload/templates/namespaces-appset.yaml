@@ -4,30 +4,28 @@ metadata:
   name: "{{ .Values.workloadName }}-namespaces"
 spec:
   goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
 
+  # -----------------------------------------------------
+  # 1. Generate one record per environment
+  # -----------------------------------------------------
   generators:
-  - matrix:
-      generators:
-        # 1️⃣ First generator: load workload.yaml
-        - git:
-            repoURL: https://github.com/satishbpatil/control-plane
-            revision: HEAD
-            files:
-              - path: "workload/{{ .Values.workloadName }}/workload.yaml"
+    - git:
+        repoURL: https://github.com/satishbpatil/control-plane
+        revision: HEAD
+        files:
+          - path: "workload/{{ .Values.workloadName }}/environments.yaml"
 
-        # 2️⃣ Second generator: expand environments into list items
-        - list:
-            elements:
-              {{- range $env, $cfg := .Values.environments }}
-              - environment: "{{ $env }}"
-                cluster: "{{ $cfg.cluster }}"
-              {{- end }}
-
+  # -----------------------------------------------------
+  # 2. Template for each generated environment
+  # -----------------------------------------------------
   template:
     metadata:
       name: "{{ .Values.workloadName }}-{{ .environment }}-namespaces"
+
     spec:
       project: default
+
       source:
         repoURL: https://github.com/satishbpatil/control-plane
         targetRevision: HEAD
@@ -38,8 +36,8 @@ spec:
             workloadName: "{{ .Values.workloadName }}"
             environment: "{{ .environment }}"
           valueFiles:
-            - "workload/{{ .Values.workloadName }}/namespace/default-values.yaml"
-            - "workload/{{ .Values.workloadName }}/namespace/{{ .environment }}-values.yaml"
+            - "../../../../workload/{{ .Values.workloadName }}/namespace/default-values.yaml"
+            - "../../../../workload/{{ .Values.workloadName }}/namespace/{{ .environment }}-values.yaml"
 
       destination:
         name: "{{ .cluster }}"
