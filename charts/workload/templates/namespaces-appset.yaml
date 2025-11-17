@@ -4,33 +4,35 @@ metadata:
   name: "{{ .Values.workloadName }}-namespaces"
 spec:
   goTemplate: true
-  goTemplateOptions: ["missingkey=error"]
 
   generators:
-  - git:
-      repoURL: https://github.com/satishbpatil/control-plane
-      revision: HEAD
-      files:
-        - path: "workload/{{ .Values.workloadName }}/workload.yaml"
-    name: workload
   - matrix:
       generators:
+        # 1️⃣ First generator: load workload.yaml
+        - git:
+            repoURL: https://github.com/satishbpatil/control-plane
+            revision: HEAD
+            files:
+              - path: "workload/{{ .Values.workloadName }}/workload.yaml"
+
+        # 2️⃣ Second generator: expand environments into list items
         - list:
             elements:
               {{- range $env, $cfg := .Values.environments }}
               - environment: "{{ $env }}"
                 cluster: "{{ $cfg.cluster }}"
-              {{- end }}      
+              {{- end }}
+
   template:
     metadata:
       name: "{{ .Values.workloadName }}-{{ .environment }}-namespaces"
     spec:
       project: default
-
       source:
         repoURL: https://github.com/satishbpatil/control-plane
         targetRevision: HEAD
         path: charts/namespaces
+
         helm:
           values: |
             workloadName: "{{ .Values.workloadName }}"
