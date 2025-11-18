@@ -1,18 +1,9 @@
-# workload.yaml
-# Defines environment topology and project metadata for this workload.
-
-# environments:
-#   - environment: dev
-#     cluster: in-cluster
-
-#   - environment: stage
-#     cluster: cluster2
 
 {
   "aws_account": "123456",
   "asset_id": "11223344",
   "cluster": {
-    "environment": "dev"
+    "environment": "dev",
     "owner": "cluster-admin@company.com",
     "name": "engineering-dev",
     "address": "https://1.2.3.4"
