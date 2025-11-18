@@ -18,8 +18,8 @@ spec:
         helm:
           values: |
             workloadName: "{{path.basename}}"          
-          valueFiles:
-          - '../../{{path}}/workload.yaml'
+          # valueFiles:
+          # - '../../{{path}}/workload.yaml'
         repoURL: 'https://github.com/satishbpatil/control-plane'
         path: charts/workload
         targetRevision: HEAD
