@@ -14,7 +14,7 @@ spec:
         repoURL: https://github.com/satishbpatil/control-plane
         revision: HEAD
         files:
-          - path: "workload/webstore/environments.json"
+          - path: "workload/{{ .Values.workloadName }}/environments.json"
 
   # -----------------------------------------------------
   # 2. Template for each generated environment
