@@ -21,7 +21,7 @@ spec:
   # -----------------------------------------------------
   template:
     metadata:
-      name: "{{ .Values.workloadName }}-{{ .environment }}-namespaces"
+      name: "{{ .Values.workloadName }}-{{ .cluster.environment }}-namespaces"
 
     spec:
       project: default
