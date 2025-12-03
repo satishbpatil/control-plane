@@ -39,7 +39,7 @@ spec:
             - "../../../../workload/{{ .Values.workloadName }}/namespace/{{`{{ .path.basename }}`}}/{{`{{ .path.basename }}`}}-values.yaml"
 
       destination:
-        name: "`{{ .cluster.name }}`"
+        name: "{{`{{ .cluster.name }}`}}"
         namespace: argocd
 
       syncPolicy:
