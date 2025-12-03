@@ -35,8 +35,8 @@ spec:
             workloadName: "{{ .Values.workloadName }}"
             environment: "{{`{{ .path.basename }}`}}"
           valueFiles:
-            - "../../../../workload/{{ .Values.workloadName }}/namespace/default-values.yaml"
-            - "../../../../workload/{{ .Values.workloadName }}/namespace/{{`{{ .path.basename }}`}}/{{`{{ .path.basename }}`}}-values.yaml"
+            - "../../../workload/{{ .Values.workloadName }}/namespace/default-values.yaml"
+            - "../../../workload/{{ .Values.workloadName }}/namespace/{{`{{ .path.basename }}`}}/{{`{{ .path.basename }}`}}-values.yaml"
 
       destination:
         name: "{{`{{ .cluster.name }}`}}"
