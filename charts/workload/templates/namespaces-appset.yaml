@@ -29,7 +29,7 @@ spec:
       source:
         repoURL: https://github.com/satishbpatil/control-plane
         targetRevision: HEAD
-        path: charts/namespaces1
+        path: charts/namespace1
         helm:
           values: |
             workloadName: "{{ .Values.workloadName }}"
