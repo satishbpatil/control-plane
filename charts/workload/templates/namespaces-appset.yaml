@@ -14,14 +14,14 @@ spec:
         repoURL: https://github.com/satishbpatil/control-plane
         revision: HEAD
         files:
-          - path: "workload/{{ .Values.workloadName }}/environments.json"
+          - path: "workload/{{ .Values.workloadName }}/namespace/**/config.json"
 
   # -----------------------------------------------------
   # 2. Template for each generated environment
   # -----------------------------------------------------
   template:
     metadata:
-      name: "{{ .Values.workloadName }}-{{ .cluster.environment }}-namespaces"
+      name: "{{ .Values.workloadName }}-namespace-`{{.path.basename}}`"
 
     spec:
       project: default
@@ -29,18 +29,17 @@ spec:
       source:
         repoURL: https://github.com/satishbpatil/control-plane
         targetRevision: HEAD
-        path: charts/namespaces
-
+        path: charts/namespaces1
         helm:
           values: |
             workloadName: "{{ .Values.workloadName }}"
-            environment: "{{ .environment }}"
+            environment: "`{{.path.basename}}`"
           valueFiles:
             - "../../../../workload/{{ .Values.workloadName }}/namespace/default-values.yaml"
-            - "../../../../workload/{{ .Values.workloadName }}/namespace/{{ .environment }}-values.yaml"
+            - "../../../../workload/{{ .Values.workloadName }}/namespace/`{{.path.basename}}`/`{{.path.basename}}`-values.yaml"
 
       destination:
-        name: "{{ .cluster.name }}"
+        name: "`{{ .cluster.name }}`"
         namespace: argocd
 
       syncPolicy:
