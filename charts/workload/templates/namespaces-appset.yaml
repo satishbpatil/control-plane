@@ -1,4 +1,4 @@
-{{- $cfg := fromJson ( .Files.Get (printf "../workload/%s/environments.json" .Values.workloadName) ) -}}
+{{- $cfg := fromJson ( .Files.Get (printf "../../workload/%s/environments.json" .Values.workloadName) ) -}}
 
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
