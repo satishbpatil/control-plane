@@ -19,8 +19,8 @@ spec:
           ignoreMissingValueFiles: true
           values: |
             workloadName: "{{path.basename}}"          
-          # valueFiles:
-          # - '../workload/{{path}}/repo.json'
+          valueFiles:
+          - '../workload/{{path}}/environments.json'
         repoURL: 'https://github.com/satishbpatil/control-plane'
         path: charts/workload
         targetRevision: HEAD
