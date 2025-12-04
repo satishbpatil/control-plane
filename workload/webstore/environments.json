@@ -1,11 +1,9 @@
 
-{
-  "aws_account": "123456",
-  "asset_id": "11223344",
-  "cluster": {
-    "environment": "dev",
-    "owner": "cluster-admin@company.com",
-    "name": "engineering-dev",
-    "address": "https://1.2.3.4"
+{ "workload": "webstore", 
+  "repo": "https://d2cyd6xxul0szm.cloudfront.net/gitea/workshop-user/eks-blueprints-workshop-gitops-apps.git",
+  "environments": 
+   [ 
+    { "name": "dev", "cluster": "in-cluster" }, 
+    { "name": "stage", "cluster": "stage" } 
+   ] 
   }
-}
