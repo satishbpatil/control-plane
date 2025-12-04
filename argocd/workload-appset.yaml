@@ -16,7 +16,7 @@ spec:
       project: default
       source:
         helm:
-          ignoreMissingValueFiles: true
+          # ignoreMissingValueFiles: true
           values: |
             workloadName: "{{path.basename}}"          
           valueFiles:
