@@ -1,5 +1,3 @@
-{{- $cfg := fromJson ( .Files.Get (printf "../workload/%s/environments.json" .Values.workloadName) ) -}}
-
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -9,22 +7,21 @@ spec:
   goTemplateOptions: ["missingkey=error"]
 
   # -----------------------------------------------------
-  # 1. Generate one record per environment from environments.json
+  # 1. Generate one record per environment
   # -----------------------------------------------------
   generators:
-    - list:
-        elements:
-{{- range $cfg.environments }}
-          - env: {{ .env | quote }}
-            cluster: {{ .cluster | quote }}
-{{- end }}
+    - git:
+        repoURL: https://github.com/satishbpatil/control-plane
+        revision: HEAD
+        files:
+          - path: "workload/{{ .Values.workloadName }}/namespace/**/config.json"
 
   # -----------------------------------------------------
   # 2. Template for each generated environment
   # -----------------------------------------------------
   template:
     metadata:
-      name: "{{ .Values.workloadName }}-namespace-{{`{{ .env }}`}}"
+      name: "{{ .Values.workloadName }}-namespace-{{`{{ .path.basename }}`}}"
 
     spec:
       project: default
@@ -37,13 +34,13 @@ spec:
           ignoreMissingValueFiles: true
           values: |
             workloadName: "{{ .Values.workloadName }}"
-            environment: "{{`{{ .env }}`}}"
+            environment: "{{`{{ .path.basename }}`}}"
           valueFiles:
             - "../../workload/{{ .Values.workloadName }}/namespace/default-values.yaml"
-            - "../../workload/{{ .Values.workloadName }}/namespace/{{`{{ .env }}`}}/{{`{{ .env }}`}}-values.yaml"
+            - "../../workload/{{ .Values.workloadName }}/namespace/{{`{{ .path.basename }}`}}/{{`{{ .path.basename }}`}}-values.yaml"
 
       destination:
-        name: "{{`{{ .cluster }}`}}"
+        name: "{{`{{ .cluster.name }}`}}"
         namespace: argocd
 
       syncPolicy:
