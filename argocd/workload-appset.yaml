@@ -3,29 +3,39 @@ kind: ApplicationSet
 metadata:
   name: workloads
 spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+
   generators:
-  - git:
-      repoURL: https://github.com/satishbpatil/control-plane
-      revision: HEAD
-      directories:
-      - path: "workload/*"
+    - git:
+        repoURL: https://github.com/satishbpatil/control-plane
+        revision: HEAD
+        directories:
+          - path: "workload/*"
+
   template:
     metadata:
-      name: 'workload-{{path.basename}}'
+      name: "workload-{{ .path.basename }}"
+
     spec:
       project: default
+
       source:
-        helm:
-          # ignoreMissingValueFiles: true
-          values: |
-            workloadName: "{{path.basename}}"          
-          valueFiles:
-          - '../workload/{{path}}/environments.json'
-        repoURL: 'https://github.com/satishbpatil/control-plane'
-        path: charts/workload
+        repoURL: https://github.com/satishbpatil/control-plane
         targetRevision: HEAD
+        path: charts/workload
+        helm:
+          values: |
+            workloadName: "{{ .path.basename }}"
+          valueFiles:
+            - "../../{{ .path }}/environments.json"
+
       destination:
-        namespace: 'argocd'
-        name: 'in-cluster'
+        name: in-cluster
+        namespace: argocd
+
       syncPolicy:
-        automated: {}
+        automated:
+          prune: true
+          selfHeal: true
