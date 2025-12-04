@@ -16,10 +16,11 @@ spec:
       project: default
       source:
         helm:
+          ignoreMissingValueFiles: true
           values: |
             workloadName: "{{path.basename}}"          
-          # valueFiles:
-          # - '../../{{path}}/workload.yaml'
+          valueFiles:
+          - '../workload/{{path}}/repo.json'
         repoURL: 'https://github.com/satishbpatil/control-plane'
         path: charts/workload
         targetRevision: HEAD
