@@ -1,6 +1,0 @@
-{
-  "env": "dev",
-  "cluster": {
-    "name": "in-cluster",
-  }
-}

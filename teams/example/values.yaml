@@ -1,7 +1,0 @@
-cluster: in-cluster
-namespaces:
-- dev
-- stage
-- prod
-repos:
-- demo-app-deploy
