@@ -33,7 +33,7 @@ spec:
             environment: "{{`{{ .env }}`}}"
           valueFiles:
             - "../../workload/{{ .Values.workloadName }}/namespace/default-values.yaml"
-            - "../../workload/{{ .Values.workloadName }}/namespace/{{`{{ .env }}`}}/{{`{{ .env }}`}}-values.yaml"
+            - "../../workload/{{ .Values.workloadName }}/namespace/{{`{{ .env }}`}}-values.yaml"
 
       destination:
         name: "{{`{{ .cluster }}`}}"
