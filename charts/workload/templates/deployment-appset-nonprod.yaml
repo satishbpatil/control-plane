@@ -31,8 +31,7 @@ spec:
         env: "{{ $env.name }}"
 
     spec:
-      project: "{{ $.Values.project | default "default" }}"
-
+      project: "{{ $$.Values.workloadName }}-nonprod"
       source:
         repoURL: "{{ $.Values.repo }}"
         targetRevision: HEAD
