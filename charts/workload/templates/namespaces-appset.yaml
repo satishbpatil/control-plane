@@ -25,7 +25,7 @@ spec:
       source:
         repoURL: https://github.com/satishbpatil/control-plane
         targetRevision: HEAD
-        path: charts/namespace1
+        path: charts/namespace
         helm:
           ignoreMissingValueFiles: true
           values: |

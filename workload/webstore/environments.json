@@ -2,7 +2,7 @@
   "workload": "webstore",
   "repo": "https://d2cyd6xxul0szm.cloudfront.net/gitea/workshop-user/eks-blueprints-workshop-gitops-apps.git",
   "environments": [
-    { "name": "dev",   "cluster": "in-cluster" },
+    { "name": "dev",   "cluster": "hub" },
     { "name": "staging", "cluster": "stage" }
   ]
 }
