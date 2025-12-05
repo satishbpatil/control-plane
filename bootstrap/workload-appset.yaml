@@ -32,7 +32,7 @@ spec:
             - "../../workload/{{ .path.basename }}/environments.json"
 
       destination:
-        name: in-cluster
+        name: hub
         namespace: argocd
 
       syncPolicy:
