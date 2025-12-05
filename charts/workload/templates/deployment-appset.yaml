@@ -41,7 +41,7 @@ spec:
         # 🔹 per-env cluster from environments.json
         name: "{{ $env.cluster }}"
         # 🔹 namespace pattern per env (your namespaces AppSet already creates these)
-        namespace: "{{ $.Values.workloadName }}-{{ $env.name }}"
+        # namespace: "{{ $.Values.workloadName }}-{{ $env.name }}"
 
       syncPolicy:
         automated:
