@@ -28,7 +28,7 @@ spec:
         env: "prod"
 
     spec:
-      project: "{{ $.Values.project | default "default" }}"
+      project: "{{ $.Values.workloadName }}-prod"
 
       source:
         repoURL: "{{ $.Values.repo }}"
