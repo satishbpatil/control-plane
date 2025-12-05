@@ -13,12 +13,15 @@ spec:
         repoURL: "{{ .Values.repo }}"
         revision: HEAD
         directories:
-          # match all env folders for all services
-          - path: "webstore/*/*"
-            # but ignore "base" and "prod"
-            exclude:
-              - "webstore/*/base"
-              - "webstore/*/prod"
+          # 1) include all service/env pairs
+          - path: "{{ .Values.workloadName }}/*/*"
+          # 2) exclude base
+          - path: "{{ .Values.workloadName }}/*/base"
+            exclude: true
+          # 3) exclude prod
+          - path: "{{ .Values.workloadName }}/*/prod"
+            exclude: true        
+
 
   template:
     metadata:
