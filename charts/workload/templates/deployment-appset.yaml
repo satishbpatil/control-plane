@@ -42,7 +42,7 @@ spec:
       destination:
         # per-env cluster from environments.json
         name: "{{ $env.cluster }}"
-        namespace: "{{ index .path.segments 1 }}"
+        namespace: {{`{{ index .path.segments 1 }}`}}
         # you can add namespace if you want per-env namespaces:
         # namespace: "{{ $.Values.workloadName }}-{{ $env.name }}"
 
