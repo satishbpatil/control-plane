@@ -29,7 +29,7 @@ spec:
           values: |
             workloadName: "{{ .path.basename }}"
           valueFiles:
-            - "../../{{ .path }}/environments.json"
+            - "../../workload/{{ .path.basename }}/environments.json"
 
       destination:
         name: in-cluster
