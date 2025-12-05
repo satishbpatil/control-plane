@@ -8,47 +8,46 @@ spec:
   goTemplateOptions:
     - missingkey=error
 
+  # ------------------------------------------
+  # 1. Data-driven env → cluster mapping
+  # ------------------------------------------
   generators:
-    - git:
-        repoURL: "{{ .Values.repo }}"
-        revision: HEAD
-        directories:
-          # 1) include all service/env pairs
-          - path: "{{ .Values.workloadName }}/*/*"
-          # 2) exclude base
-          - path: "{{ .Values.workloadName }}/*/base"
-            exclude: true
-          # 3) exclude prod
-          - path: "{{ .Values.workloadName }}/*/prod"
-            exclude: true        
+    - list:
+        elements:
+{{- range .Values.environments }}
+{{- if ne .name "prod" }}        # only non-prod envs
+          - env: {{ .name | quote }}
+            cluster: {{ .cluster | quote }}
+{{- end }}
+{{- end }}
 
-
+  # ------------------------------------------
+  # 2. One Application per environment
+  # ------------------------------------------
   template:
     metadata:
-      # path example: webstore/catalog/dev
-      # parts: ["webstore", "catalog", "dev"]
-      # service = index(parts, 1) = "catalog"
-      # env     = .path.basename       = "dev"
-      name: "{{ .Values.workloadName }}-{{`{{ index (splitList \"/\" .path) 1 }}`}}-{{`{{ .path.basename }}`}}"
+      # e.g. webstore-dev, webstore-stage
+      name: "{{ .Values.workloadName }}-{{`{{ .env }}`}}"
       labels:
         workload: "{{ .Values.workloadName }}"
-        service: "{{`{{ index (splitList \"/\" .path) 1 }}`}}"
-        env: "{{`{{ .path.basename }}`}}"
+        env: "{{`{{ .env }}`}}"
 
     spec:
       project: "{{ .Values.project | default "default" }}"
 
       source:
+        # 🔹 apps repo from environments.json / values
         repoURL: "{{ .Values.repo }}"
         targetRevision: HEAD
-        # full path like: webstore/catalog/dev
-        path: "{{`{{ .path }}`}}"
+        # adjust this to your repo layout
+        # example: webstore/dev, webstore/stage, etc.
+        path: "{{ .Values.workloadName }}/{{`{{ .env }}`}}"
 
       destination:
-        # e.g. "in-cluster", "kind-nonprod", or some registered cluster
-        name: "{{ .Values.nonprodClusterName | default "in-cluster" }}"
-        # per-env namespace (e.g. webstore-dev, webstore-staging)
-        namespace: "{{ .Values.workloadName }}-{{`{{ .path.basename }}`}}"
+        # 🔹 cluster comes from environments.json
+        name: "{{`{{ .cluster }}`}}"
+        # per-env namespace, e.g. webstore-dev, webstore-stage
+        # namespace: "{{ .Values.workloadName }}-{{`{{ .env }}`}}"
 
       syncPolicy:
         automated:
