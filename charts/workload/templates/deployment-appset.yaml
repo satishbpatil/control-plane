@@ -22,11 +22,12 @@ spec:
   template:
     metadata:
       # path example: webstore/catalog/dev
-      # parts: ["webstore", "catalog", "dev"]
-      name: "{{ $.Values.workloadName }}-{{`{{ index (splitList \"/\" .path) 1 }}`}}-{{ $env.name }}"
+      # .path.segments = ["webstore", "catalog", "dev"]
+      # service = index .path.segments 1 = "catalog"
+      name: "{{ $.Values.workloadName }}-{{`{{ index .path.segments 1 }}`}}-{{ $env.name }}"
       labels:
         workload: "{{ $.Values.workloadName }}"
-        service: "{{`{{ index (splitList \"/\" .path) 1 }}`}}"
+        service: "{{`{{ index .path.segments 1 }}`}}"
         env: "{{ $env.name }}"
 
     spec:
@@ -35,12 +36,13 @@ spec:
       source:
         repoURL: "{{ $.Values.repo }}"
         targetRevision: HEAD
-        path: "{{`{{ .path }}`}}"
+        # full path like: webstore/catalog/dev
+        path: "{{`{{ .path.path }}`}}"
 
       destination:
-        # 🔹 per-env cluster from environments.json
+        # per-env cluster from environments.json
         name: "{{ $env.cluster }}"
-        # 🔹 namespace pattern per env (your namespaces AppSet already creates these)
+        # you can add namespace if you want per-env namespaces:
         # namespace: "{{ $.Values.workloadName }}-{{ $env.name }}"
 
       syncPolicy:
