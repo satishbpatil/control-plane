@@ -1,0 +1,69 @@
+
+{{- $workload := .Values.workloadName -}}
+{{- $repo := .Values.repo -}}
+{{- $envs := .Values.environments | default list -}}
+
+{{- $adminGroup    := printf "team-%s-prod-admins"    $workload -}}
+{{- $operatorGroup := printf "team-%s-prod-operators" $workload -}}
+{{- $viewerGroup   := printf "team-%s-prod-viewers"   $workload -}}
+
+{{/* =========================
+     PROD PROJECT
+     ========================= */}}
+{{- $prodProject := printf "%s-prod" $workload -}}
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: {{ $prodProject }}
+  namespace: argocd
+  labels:
+    team: {{ $workload | quote }}
+    env: "prod"
+spec:
+  description: "Prod Argo CD project for team {{ $workload }}"
+
+  # Git source for this workload
+  sourceRepos:
+    - {{ $repo | quote }}
+
+  # All prod destinations (anything that's not env.name == "prod")
+  destinations:
+{{- range $env := $envs }}
+{{- if eq $env.name "prod" }}
+    - name: {{ $env.cluster | quote }}
+      namespace: "*"
+      server: "*"
+{{- end }}
+{{- end }}
+
+  # You can tighten this later
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+
+  roles:
+    # Operators (like your "developer" example) – can sync + get
+    - name: operator
+      description: "Operators can sync and view applications in prod"
+      policies:
+        - p, proj:{{ $prodProject }}:operator, applications, sync, {{ $prodProject }}/*, allow
+        - p, proj:{{ $prodProject }}:operator, applications, get,  {{ $prodProject }}/*, allow
+      groups:
+        - {{ $operatorGroup | quote }}
+
+    # Admins – full access in prod
+    - name: admin
+      description: "Admins have full access in prod"
+      policies:
+        - p, proj:{{ $prodProject }}:admin, applications, *, {{ $prodProject }}/*, allow
+      groups:
+        - {{ $adminGroup | quote }}
+
+    # Viewers – read-only
+    - name: viewer
+      description: "View-only access to prod applications"
+      policies:
+        - p, proj:{{ $prodProject }}:viewer, applications, get, {{ $prodProject }}/*, allow
+      groups:
+        - {{ $viewerGroup | quote }}
+
