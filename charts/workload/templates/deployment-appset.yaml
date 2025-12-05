@@ -1,56 +1,52 @@
 {{- if .Values.repo }}
+{{- range $env := .Values.environments }}
+{{- if ne $env.name "prod" }}  # non-prod only
+---
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: "deployment-{{ .Values.workloadName }}-nonprod"
+  name: "deployment-{{ $.Values.workloadName }}-{{ $env.name }}"
 spec:
   goTemplate: true
   goTemplateOptions:
     - missingkey=error
 
-  # ------------------------------------------
-  # 1. Data-driven env → cluster mapping
-  # ------------------------------------------
   generators:
-    - list:
-        elements:
-{{- range .Values.environments }}
-{{- if ne .name "prod" }}        # only non-prod envs
-          - env: {{ .name | quote }}
-            cluster: {{ .cluster | quote }}
-{{- end }}
-{{- end }}
+    - git:
+        repoURL: "{{ $.Values.repo }}"
+        revision: HEAD
+        directories:
+          # webstore/<service>/<env>, e.g. webstore/ui/dev
+          - path: "{{ $.Values.workloadName }}/*/{{ $env.name }}"
 
-  # ------------------------------------------
-  # 2. One Application per environment
-  # ------------------------------------------
   template:
     metadata:
-      # e.g. webstore-dev, webstore-stage
-      name: "{{ .Values.workloadName }}-{{`{{ .env }}`}}"
+      # path example: webstore/catalog/dev
+      # parts: ["webstore", "catalog", "dev"]
+      name: "{{ $.Values.workloadName }}-{{`{{ index (splitList \"/\" .path) 1 }}`}}-{{ $env.name }}"
       labels:
-        workload: "{{ .Values.workloadName }}"
-        env: "{{`{{ .env }}`}}"
+        workload: "{{ $.Values.workloadName }}"
+        service: "{{`{{ index (splitList \"/\" .path) 1 }}`}}"
+        env: "{{ $env.name }}"
 
     spec:
-      project: "{{ .Values.project | default "default" }}"
+      project: "{{ $.Values.project | default "default" }}"
 
       source:
-        # 🔹 apps repo from environments.json / values
-        repoURL: "{{ .Values.repo }}"
+        repoURL: "{{ $.Values.repo }}"
         targetRevision: HEAD
-        # adjust this to your repo layout
-        # example: webstore/dev, webstore/stage, etc.
-        path: "{{ .Values.workloadName }}/{{`{{ .env }}`}}"
+        path: "{{`{{ .path }}`}}"
 
       destination:
-        # 🔹 cluster comes from environments.json
-        name: "{{`{{ .cluster }}`}}"
-        # per-env namespace, e.g. webstore-dev, webstore-stage
-        # namespace: "{{ .Values.workloadName }}-{{`{{ .env }}`}}"
+        # 🔹 per-env cluster from environments.json
+        name: "{{ $env.cluster }}"
+        # 🔹 namespace pattern per env (your namespaces AppSet already creates these)
+        namespace: "{{ $.Values.workloadName }}-{{ $env.name }}"
 
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
+{{- end }}
+{{- end }}
 {{- end }}
